@@ -1,0 +1,114 @@
+﻿@page "/"
+<!-- Can use a dummy location such as /users/{username} to store Book objects for each borrowed book -->
+@using BlazorConversion.Data
+@using BlazorConversion.Services
+@inject ILibrary Librarian
+
+<h1>Library Users</h1>
+
+<div>
+    <h3>User Registration</h3>
+    <table>
+        <tr>
+            <td>Name:</td>
+            <td><input type="text" @bind=userName /></td>
+        </tr>
+        <tr>
+            <td>Email:</td>
+            <td><input type="text" @bind=userEmail /></td>
+        </tr>
+    </table>
+    <br />
+    <button @onclick=AddUser>Add User</button>
+</div>
+<br />
+<div>
+    User ID:<input type="number" @bind=userID /><br />
+    <br />
+    <table>
+        <tr>
+            <button @onclick=EditUser>Edit User</button>
+            <td></td>
+            <button @onclick=DeleteUser>Delete User</button>
+        </tr>
+    </table>    
+</div>
+<br />
+<div>
+    <h3>Registered Users</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        @foreach (User user in Librarian.Users)
+        {
+            <tr>
+                <td>@user.Id</td>
+                <td>@user.Name</td>
+                <td>@user.Email</td>
+            </tr>
+        }
+    </table>
+</div>
+
+
+
+@code {
+    int userID;
+    string userName;
+    string userEmail;
+
+    /// <summary>
+    /// Adds a User defined by userName and userEmail to Librarian.Users
+    /// </summary>
+    /// <returns></returns>
+    public async Task AddUser()
+    {
+        int id = Librarian.Users.Any() ? Librarian.Users.Max(u => u.Id) + 1 : 1;
+        Librarian.Users.Add(new User { Id = id, Name = userName, Email = userEmail });
+    }
+
+    /// <summary>
+    /// Edits a User in Librarian.Users designated by userID to match userName and userEmail
+    /// </summary>
+    /// <returns></returns>
+    public async Task EditUser()
+    {
+        User user = Librarian.Users.FirstOrDefault(u => u.Id == userID);
+
+        if (user != null)
+        {
+            if (!string.IsNullOrEmpty(userName)) user.Name = userName;
+            if (!string.IsNullOrEmpty(userEmail)) user.Email = userEmail;
+
+            Console.WriteLine("User updated successfully!\n");
+        }
+        else
+        {
+            Console.WriteLine("User not found!\n");
+        }
+    }
+
+    /// <summary>
+    /// Deletes a User from Librarian.Users designated by userID
+    /// </summary>
+    /// <returns></returns>
+    public async Task DeleteUser()
+    {
+        User user = Librarian.Users.FirstOrDefault(u => u.Id == userID);
+
+        if (user != null)
+        {
+            Librarian.Users.Remove(user);
+            Console.WriteLine("User deleted successfully!\n");
+        }
+        else
+        {
+            Console.WriteLine("User not found!\n");
+        }
+    }
+}

@@ -1,0 +1,128 @@
+﻿@page "/zBooks" 
+<!-- Can use a dummy location such as /users/{username} to store Book objects for each borrowed book -->
+
+@using BlazorConversion.Data
+@using BlazorConversion.Services
+@inject ILibrary Librarian
+
+<h1>Library Inventory</h1>
+
+<div>
+    <h3>Book Registration</h3>
+    <table>
+        <tr>
+            <td>Title:</td>
+            <td><input type="text" @bind=bookTitle /></td>
+        </tr>
+        <tr>
+            <td>Author:</td>
+            <td><input type="text" @bind=bookAuthor /></td>
+        </tr>
+        <tr>
+            <td>ISBN:</td>
+            <td><input type="text" @bind=bookIsbn /></td>
+        </tr>
+    </table>
+    <br />
+    <button @onclick=AddBook>Add Book</button>
+</div>
+<br />
+<div>
+    Book ID:<input type="number" @bind=bookID /><br />
+    <br />
+    <table>
+        <tr>
+            <button @onclick=EditBook>Edit Book</button>
+            <td></td>
+            <button @onclick=DeleteBook>Delete Book</button>
+        </tr>
+    </table>
+</div>
+<br />
+<div>
+    <h3>Library Inventory</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>ISBN</th>
+            </tr>
+        </thead>
+        @foreach (Book book in Librarian.Books)
+        {
+            <tr>
+                <td>@book.Id</td>
+                <td>@book.Title</td>
+                <td>@book.Author</td>
+                <td>@book.ISBN</td>
+            </tr>
+        }
+    </table>
+</div>
+
+
+
+@code {
+    int bookID;
+    string bookTitle;
+    string bookAuthor;
+    string bookIsbn;
+
+    /// <summary>
+    /// Adds a book described by bookTitle, bookAuthor, and bookIsbn to the Librarian.Books collection.
+    /// </summary>
+    /// <returns></returns>
+    public async Task AddBook()
+    {
+        int id = Librarian.Books.Any() ? Librarian.Books.Max(b => b.Id) + 1 : 1;
+        Librarian.Books.Add(new Book { Id = id, Title = bookTitle, Author = bookAuthor, ISBN = bookIsbn });
+    }
+
+    /// <summary>
+    /// Modifies a stored Book designated by bookID to match bookTitle, bookAuthor, bookIsbn
+    /// </summary>
+    /// <returns></returns>
+    public async Task EditBook()
+    {
+        if (bookID == null)
+        {
+            Console.WriteLine("Please enter book ID!\n");
+            return;
+        }
+        Book book = Librarian.Books.FirstOrDefault(b => b.Id == bookID);
+
+        if (book != null)
+        {
+            if (!string.IsNullOrEmpty(bookTitle)) book.Title = bookTitle;
+
+            if (!string.IsNullOrEmpty(bookAuthor)) book.Author = bookAuthor;
+
+            if (!string.IsNullOrEmpty(bookIsbn)) book.ISBN = bookIsbn;
+        }
+        else
+        {
+            Console.WriteLine("Book not found!\n");
+        }
+    }
+
+    /// <summary>
+    /// Removes a Book desginated by bookID from Librarian.Books
+    /// </summary>
+    /// <returns></returns>
+    public async Task DeleteBook()
+    {
+        try
+        {
+            Book book = Librarian.Books.FirstOrDefault(b => b.Id == bookID);
+            Librarian.Books.Remove(book);
+            Console.WriteLine("Book deleted successfully!\n");
+        }
+        catch
+        {
+            Console.WriteLine("Book not found!\n");
+        }
+    }
+
+}
